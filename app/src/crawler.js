@@ -182,7 +182,6 @@ module.exports = class Crawler {
             ele.click();
           });
         
-        logger.info(` Clicked model  ${self.config["data"][j].name}`)
         await page.waitFor(1000);
         // Click on brand 
         await page.evaluate( async (j) => {
@@ -205,8 +204,7 @@ module.exports = class Crawler {
         
         await page.waitFor(1000);
               
-
-          logger.info(`Clicking on particular mode`) 
+          logger.info(`Clicking on particular model ${self.config["data"][j].models[jj].name}`) 
           // Click on model
             await page.evaluate( async (jj) => {
               try{
@@ -219,7 +217,6 @@ module.exports = class Crawler {
           
           await page.waitFor(1000);
           
-          await page.screenshot({path: `${self.projectDir}debug.png`});
           //Submit the form
           logger.info(`Submitting the form....`)
           await page.evaluate( () => {
@@ -231,8 +228,8 @@ module.exports = class Crawler {
           await page.waitFor(2500);
           
 
-          console.log(`Took screenshot 1-${j}.png`)
-          await page.screenshot({path: `${self.projectDir}1-${j}.png`});
+//           console.log(`Took screenshot 1-${j}.png`)
+//           await page.screenshot({path: `${self.projectDir}1-${j}.png`});
           console.log(`Done Models  ${jj+1} of ${self.config["data"][j]["models"].length}`)
           
           let _url = await page.url();
@@ -258,7 +255,7 @@ module.exports = class Crawler {
       await page.waitFor(4000);
       
       // Take screenshot
-      await page.screenshot({path: `${self.projectDir}1.png`});
+//       await page.screenshot({path: `${self.projectDir}1.png`});
 
       await browser.close();
       logger.info(`All Done`)
