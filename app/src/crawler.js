@@ -12,7 +12,7 @@ module.exports = class Crawler {
     logger.info(`Crawler inited`)
     
     //Create outpur dir if not there 
-    if( fs.existsSync(path.join(__dirname, `../output`)) )
+    if( !fs.existsSync(path.join(__dirname, `../output`)) )
       fs.mkdirSync( path.join(__dirname, `../output`) )
     
     // Check if this is new session or existing one 
