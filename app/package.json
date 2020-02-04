@@ -1,0 +1,19 @@
+{
+  "name": "fantastic-car-crawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "startS":"chmod -R 777 /fantastic-car-crawler/* && node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "puppeteer": "^2.1.0",
+    "shortid": "^2.2.15",
+    "winston": "^3.2.1"
+  }
+}
