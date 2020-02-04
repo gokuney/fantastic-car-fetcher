@@ -155,7 +155,6 @@ module.exports = class Crawler {
         await page.waitFor(1000);
         
         
-        logger.info(`Mapping list of models to map with ${self.config["data"][j]}`)
         let nModels = await page.evaluate( () => {
         let ele = document.querySelectorAll(".gs_ta_results .gs_ta_group-child")
         let arr = [];
@@ -183,7 +182,7 @@ module.exports = class Crawler {
             ele.click();
           });
         
-        logger.info(`Clicked ${self.config["data"][j]}`)
+        logger.info(` Clicked model  ${self.config["data"][j].name}`)
         await page.waitFor(1000);
         // Click on brand 
         await page.evaluate( async (j) => {
