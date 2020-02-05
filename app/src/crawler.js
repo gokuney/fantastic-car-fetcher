@@ -32,6 +32,7 @@ module.exports = class Crawler {
       logger.info(`Creating new project with id ${this.id}`)
       fs.mkdirSync( path.join(__dirname, `../output/${this.id}/` ) )
       fs.writeFileSync( path.join(__dirname, `../output/${this.id}/config.json`), JSON.stringify( {id: this.id}, null, 4 ) )
+      this.config = {id: this.id}
     }
     
     this.projectDir = path.join(__dirname, `../output/${this.id}/` )
@@ -114,15 +115,20 @@ module.exports = class Crawler {
       var j = 0;
       while( j < self.config["data"].length){
         
+        try{
+        
          // Click on new Car
       // DOMREF: document.querySelectorAll('input[name="newcar"]')[1].click()
-      
+      try{
       logger.info(`Clicking on new car radio button`)
       await page.evaluate( () => {
         let ele = document.querySelectorAll('input[name="newcar"]')[1];
         ele.click();
       })
-        
+      }catch(e){
+        logger.error(`Error ${e}`);
+//         await page.screenshot({path: `${self.projectDir}error-debug.png`});
+      }
         
         // Click on cars drop down
           // DOMREF: #bmvBrand
@@ -238,18 +244,25 @@ module.exports = class Crawler {
           self.saveData();
           
           
-          await page.goBack();
+//           await page.goBack();
+          await page.goto(self.url);
           await page.waitFor(2500);
-          
+//           await page.screenshot({path: `${self.projectDir}debug-jj-is${jj}.png`});
         jj++;
         }//child loop for models
-        
-        
+        await page.waitFor(2500);
+//         await page.screenshot({path: `${self.projectDir}debug.png`});
 //         console.log(`Done Brands  ${j+1} of ${self.config["data"].length}`)
+//         await page.screenshot({path: `${self.projectDir}debug-j-is${j}.png`});
         j++; //parent loop for car brands
+          
+          }catch(e){
+        console.log(`Errored j ${j} jj ${jj}`)
+      }
+        
       }
       
-
+      
       //---- ./Click brand 
       
       await page.waitFor(4000);
@@ -260,6 +273,18 @@ module.exports = class Crawler {
       await browser.close();
       logger.info(`All Done`)
      })();
+    
+  }
+  
+  
+  spiderURL(){
+    let self = this
+    console.log(`Spidering with ID ${self.id}'s config file`)
+    let deviceConfig = self.config.data
+    console.log(deviceConfig)
+  }
+  
+  fetchFromURL(){
     
   }
   

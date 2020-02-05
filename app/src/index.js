@@ -8,7 +8,7 @@ const Crawler = require('./crawler')
 //---- Config 
 const siteURL = "https://www.cardekho.com"
 const config = `${__dirname}/config.json`
-const id = 'vYT2IKAT' // old id to resume
+const id = '36eDFYK_' // old id to resume
 //---- ./Config
 
 
@@ -16,7 +16,10 @@ const id = 'vYT2IKAT' // old id to resume
 
   // Create instance of Crawler
   const crawler = new Crawler(siteURL, id)
-  crawler.crawl()
+
+  //   crawler.crawl()
+  crawler.spiderURL()
+  
   
 
 //---- ./App
