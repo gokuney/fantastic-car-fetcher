@@ -64,7 +64,7 @@ module.exports = class Crawler {
       logger.info(`Opening page ${self.url}`)
       await page.goto(self.url);
       
-      const content = await page.content();
+//       const content = await page.content();
       
 //       const $ = cheerio.load(content);
 
@@ -145,7 +145,7 @@ module.exports = class Crawler {
           let brandEle = document.querySelectorAll(".gs_ta_results .gs_ta_group-child")[j]
           brandEle.click();
           }catch(e){
-            console.log(`Error in clicking item ${j}. Error: `, e)
+            logger.error(`Error in clicking item ${j}. Error: `, e)
           }
         }, j);
         
@@ -195,7 +195,7 @@ module.exports = class Crawler {
           let brandEle = document.querySelectorAll(".gs_ta_results .gs_ta_group-child")[j]
           brandEle.click();
           }catch(e){
-            console.log(`Error in clicking item ${j}. Error: `, e)
+            logger.error(`Error in clicking item ${j}. Error: `, e)
           }
         }, j);
         
@@ -217,7 +217,7 @@ module.exports = class Crawler {
               let modelsEle = document.querySelectorAll(".gs_ta_results .gs_ta_group-child")[jj]
               modelsEle.click();
               }catch(e){
-                console.log(`Error in clicking item ${jj}. Error: `, e)
+                logger.error(`Error in clicking item ${jj}. Error: `, e)
               }
             }, jj);
           
@@ -236,7 +236,7 @@ module.exports = class Crawler {
 
 //           console.log(`Took screenshot 1-${j}.png`)
 //           await page.screenshot({path: `${self.projectDir}1-${j}.png`});
-          console.log(`Done Models  ${jj+1} of ${self.config["data"][j]["models"].length}`)
+          logger.info(`Done Models  ${jj+1} of ${self.config["data"][j]["models"].length}`)
           
           let _url = await page.url();
           
@@ -257,7 +257,7 @@ module.exports = class Crawler {
         j++; //parent loop for car brands
           
           }catch(e){
-        console.log(`Errored j ${j} jj ${jj}`)
+        logger.error(`Errored j ${j} jj ${jj}`)
       }
         
       }
@@ -278,13 +278,89 @@ module.exports = class Crawler {
   
   
   spiderURL(){
+    
+    (async () => {
+      
     let self = this
-    console.log(`Spidering with ID ${self.id}'s config file`)
     let deviceConfig = self.config.data
-    console.log(deviceConfig)
+    
+    logger.info(`Spidering with ID ${self.id}'s config file ${deviceConfig.length}`)
+    
+    let j = 0;
+    while( j < deviceConfig.length){
+      let k = 0;
+      while(k < deviceConfig[j].models.length){
+          let url = deviceConfig[j].models[k].url;
+          logger.info(`Processed Brand ${j+1}/${deviceConfig.length} | Model ${k+1}/${ deviceConfig[j].models.length }`)
+          let data = await self.fetchFromURL(url)
+          self.config.data[j].models[k].data = data;
+          self.saveData();
+        
+        k++;
+      }
+      j++;
+    }
+    })();
   }
   
-  fetchFromURL(){
+  fetchFromURL(url){
+    logger.info(`Processing ${url}`)
+    let self = this
+    return new Promise( (resolve, reject) => {
+      (async () => {
+        
+         const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      })
+      let page = await browser.newPage()
+      await page.setViewport({
+        width: 1920,
+        height: 1080,
+        deviceScaleFactor: 1,
+      })
+      
+      // Open page
+      logger.info(`Opening page ${url}`)
+      await page.goto(url)
+        
+//       await page.waitFor(4000);
+      
+      const contentMain = await page.content()
+      
+      const $ = cheerio.load(contentMain)
+      
+      let data = contentMain.match(new RegExp( "window.__INITIAL_STATE__" + "(.*?)" + "};"))[0].trim().replace(/(\r\n|\n|\r)/gm, "");
+      data = JSON.parse( data.substring( data.indexOf('{'), data.lastIndexOf(";") ) )
+        
+      //Goto specs URL
+      let specURL = `${self.url}/${data.modelNav[3].link}`
+      
+      await page.goto(specURL)
+      
+      const contentSpecs = await page.content()
+      
+      let dataSpecs = contentSpecs.match(new RegExp( "window.__INITIAL_STATE__" + "(.*?)" + "};"))[0].trim().replace(/(\r\n|\n|\r)/gm, "");
+          dataSpecs = JSON.parse( dataSpecs.substring( dataSpecs.indexOf('{'), dataSpecs.lastIndexOf(";") ) )
+        
+      await browser.close()
+        
+      //Prepare car data
+      let carData = {};
+        
+      carData.specs = dataSpecs.specsTechnicalJson
+      carData.overview = {
+        id: data.overView.id,
+        priceRange: data.overView.priceRange,
+        image: data.overView.image,
+        gallery: data.overView.images,
+        mileage:  {"heading": data.mileageTable.heading, "childs": data.mileageTable.childs},
+        variant: {"heading": data.variantTable.heading, "childs": data.variantTable.childs}
+      }
+        
+      resolve(carData)
+        
+      })();
+    })
     
   }
   
